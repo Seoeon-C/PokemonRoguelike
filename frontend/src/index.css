@@ -109,3 +109,59 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Galmuri11:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  background-color: #0f0f14; /* 슬더슬풍 어두운 보랏빛 도는 검은색 */
+  background-image:
+    radial-gradient(at 50% 20%, rgba(26, 21, 44, 0.6) 0px, transparent 50%),
+    linear-gradient(to bottom, #0f0f14, #070709);
+  color: #e2e8f0;
+  font-family: 'Galmuri11', monospace; /* 선명한 한글 도트 폰트 */
+  user-select: none;
+}
+
+/* 이미지와 캔버스가 흐려지지 않고 칼같이 도트로 렌더링되게 처리 */
+img,
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* 카드가 부드럽게 들리는 효과 */
+.game-card:not(:disabled):hover {
+  transform: translateY(-20px) scale(1.08) !important;
+  z-index: 10;
+  border-color: #3b82f6 !important;
+}
+
+/* 마우스 올렸을 때 카드가 튀어나오는 효과 */
+.game-card:not(:disabled):hover {
+  transform: translateY(-24px) scale(1.08) !important;
+  z-index: 10;
+  border-color: #3b82f6 !important;
+  box-shadow:
+    0 15px 30px rgba(0, 0, 0, 0.8),
+    0 0 15px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 턴 종료 버튼 디자인 */
+.end-turn-btn {
+  padding: 16px 20px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+.end-turn-btn:hover {
+  filter: brightness(1.2);
+  transform: scale(1.03);
+}
+.end-turn-btn:active {
+  transform: scale(0.97);
+}
