@@ -14,6 +14,7 @@ import { healPlayer } from "../game/run/campActions";
 import { STAT_STAGE_LABELS, baselineCardDamage } from "../game/combat";
 import { TypeBadge } from "../components/TypeBadge";
 import { STATUS_LABELS } from "../game/pokedex/statusLabels";
+import { getPokemonSprite } from "../game/pokedex/pokemonImages";
 
 function describeEffect(effect: Card["effects"][number]): string {
   if (effect.kind === "damage") {
@@ -101,6 +102,13 @@ export function ShopScreen({ run, onDone }: { run: RunState; onDone: (run: RunSt
           >
             {offer.card.moveType && <TypeBadge type={offer.card.moveType} size={16} />}
             <div style={{ marginTop: 8, fontWeight: "bold" }}>{offer.card.koreanName ?? offer.card.name}</div>
+            {offer.card.sourceSpeciesId && (
+              <img
+                src={getPokemonSprite(offer.card.sourceSpeciesId)}
+                alt={offer.card.koreanName ?? offer.card.name}
+                style={{ width: 48, height: 48, imageRendering: "pixelated", display: "block", margin: "6px auto" }}
+              />
+            )}
             <div style={{ fontSize: 11, marginTop: 4 }}>
               {offer.card.effects.map((e, ei) => (
                 <div key={ei}>{describeEffect(e)}</div>

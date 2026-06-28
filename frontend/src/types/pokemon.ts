@@ -50,6 +50,7 @@ export interface PokemonSpecies {
   baseStats: BaseStats;
   movepool: string[];
   evolvesTo: string | null;
+  abilities: string[];
   spriteUrl: string | null;
 }
 

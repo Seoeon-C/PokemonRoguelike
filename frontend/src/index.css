@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Galmuri11:wght@400;700&display=swap');
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -110,11 +112,9 @@ code {
   background: var(--code-bg);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Galmuri11:wght@400;700&display=swap');
-
 body {
   margin: 0;
-  background-color: #0f0f14; /* 슬더슬풍 어두운 보랏빛 도는 검은색 */
+  background-color: #0f0f14; /* 어두운 보랏빛 도는 검은색 */
   background-image:
     radial-gradient(at 50% 20%, rgba(26, 21, 44, 0.6) 0px, transparent 50%),
     linear-gradient(to bottom, #0f0f14, #070709);

@@ -12,6 +12,7 @@ import { PokemonPortrait } from '../components/PokemonPortrait';
 import { TypeBadge } from '../components/TypeBadge';
 import { HpBar } from '../components/HpBar';
 import { STATUS_LABELS } from '../game/pokedex/statusLabels';
+import { getPokemonSprite } from '../game/pokedex/pokemonImages';
 
 const CLASS_LABEL: Record<PlayerClassId, string> = {
   warrior: '전',
@@ -476,19 +477,25 @@ export function CombatScreen({
                     </div>
                   </div>
 
-                  {/* 중간 그래픽 공백 데코레이션 */}
+                  {/* 중간 그래픽: 포켓몬 카드면 픽셀 스프라이트, 아니면 카드 이모지 */}
                   <div
                     style={{
                       flex: 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      opacity: 0.15,
-                      fontSize: 28,
                       pointerEvents: 'none',
                     }}
                   >
-                    🃏
+                    {card.sourceSpeciesId ? (
+                      <img
+                        src={getPokemonSprite(card.sourceSpeciesId)}
+                        alt={card.koreanName ?? card.name}
+                        style={{ width: 56, height: 56, imageRendering: 'pixelated', opacity: 0.9 }}
+                      />
+                    ) : (
+                      <span style={{ opacity: 0.15, fontSize: 28 }}>🃏</span>
+                    )}
                   </div>
 
                   {/* 카드 텍스트 설명 창 */}

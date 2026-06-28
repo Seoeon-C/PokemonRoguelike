@@ -1,50 +1,55 @@
 import type { Card, PlayerClassId } from "../../types/card";
-import { ALL_MOVES, getMove } from "../pokedex/data";
-import { cardFromMove } from "./cardFromMove";
-import { classifyMoveForClass } from "./cardClassification";
+import { ALL_SPECIES, getSpecies } from "../pokedex/data";
+import { cardFromSpecies, cardKindForSpecies, type SpeciesCardKind } from "./cardFromSpecies";
 import { HAND_AUTHORED_CARDS } from "./handAuthoredCards";
 
-// auto-classified, rule-based pools (see cardClassification.ts) — adding a new move to the
-// data set (e.g. expanding SPECIES_LIST and re-running the fetch script) flows in automatically,
-// no per-card curation needed. cards with no representable effect (e.g. evasion-only moves we
-// don't track) are dropped rather than hand-picked around.
-const MOVE_POOL_BY_CLASS: Record<PlayerClassId, Card[]> = { warrior: [], mage: [], archer: [] };
-for (const move of ALL_MOVES) {
-  const classId = classifyMoveForClass(move);
-  const card = cardFromMove(move, classId);
-  if (card.effects.length > 0) MOVE_POOL_BY_CLASS[classId].push(card);
+// which dominant-stat "kind" of species-card belongs to which class — matches
+// each class's identity (전사=물리, 마법사=특수, 궁수=공격 아닌 카드로 조준 스택)
+const CLASS_BY_KIND: Record<SpeciesCardKind, PlayerClassId> = {
+  physicalDamage: "warrior",
+  physicalDefense: "warrior",
+  specialDamage: "mage",
+  specialDefense: "mage",
+  draw: "archer",
+  energy: "archer",
+};
+
+// rule-based, species-driven pools — every one of the 1025 species becomes exactly
+// one card, classified by whichever base stat it's strongest in (see cardFromSpecies.ts)
+const SPECIES_POOL_BY_CLASS: Record<PlayerClassId, Card[]> = { warrior: [], mage: [], archer: [] };
+for (const species of ALL_SPECIES) {
+  const classId = CLASS_BY_KIND[cardKindForSpecies(species)];
+  SPECIES_POOL_BY_CLASS[classId].push(cardFromSpecies(species, classId));
 }
 
-// small, hand-picked starting decks — deliberately curated regardless of how a move auto-classifies,
-// since a starter kit is a design choice, not pool busywork
-const STARTING_MOVES_BY_CLASS: Record<PlayerClassId, string[]> = {
-  warrior: ["tackle", "harden"],
-  mage: ["ember", "water-gun"],
-  archer: ["quick-attack", "quick-attack", "peck", "agility", "leer"],
+// small, hand-picked starting decks — deliberately curated low-BST species so an
+// opening hand isn't already a powerhouse, regardless of how the auto pool classifies them.
+// every card is a Pokemon now except the mage's orb utility, which has no Pokemon equivalent.
+const STARTING_SPECIES_BY_CLASS: Record<PlayerClassId, string[]> = {
+  warrior: ["machop", "geodude", "onix", "machoke", "bellsprout"],
+  mage: ["abra", "tentacool"],
+  archer: ["rattata", "pidgey", "caterpie", "spearow", "poliwag"],
 };
 const STARTING_AUTHORED_BY_CLASS: Record<PlayerClassId, string[]> = {
-  warrior: ["basic-strike", "basic-strike", "basic-guard", "basic-guard", "quick-scout"],
-  mage: ["channel-fire", "channel-water", "evoke-front", "evoke-front", "basic-guard"],
-  archer: ["basic-guard", "quick-scout"],
+  warrior: [],
+  mage: ["channel-fire", "channel-water", "evoke-front", "evoke-front"],
+  archer: [],
 };
 
-// basic-strike/basic-guard/quick-scout aren't class-exclusive — every class can draw them
-const SHARED_CARD_IDS = new Set(["basic-strike", "basic-guard", "quick-scout", "deep-breath"]);
-
 export function classCardPool(classId: PlayerClassId): Card[] {
-  const authored = HAND_AUTHORED_CARDS.filter((c) => c.classId === classId || SHARED_CARD_IDS.has(c.id));
-  return [...MOVE_POOL_BY_CLASS[classId], ...authored];
+  const authored = HAND_AUTHORED_CARDS.filter((c) => c.classId === classId);
+  return [...SPECIES_POOL_BY_CLASS[classId], ...authored];
 }
 
 export function startingDeck(classId: PlayerClassId): Card[] {
-  const fromMoves = STARTING_MOVES_BY_CLASS[classId].map((id) => cardFromMove(getMove(id), classId));
+  const fromSpecies = STARTING_SPECIES_BY_CLASS[classId].map((id) => cardFromSpecies(getSpecies(id), classId));
   const authoredPool = new Map(HAND_AUTHORED_CARDS.map((c) => [c.id, c]));
   const fromAuthored = STARTING_AUTHORED_BY_CLASS[classId].map((id) => {
     const card = authoredPool.get(id);
     if (!card) throw new Error(`Unknown starting card: ${id}`);
     return { ...card };
   });
-  return [...fromMoves, ...fromAuthored];
+  return [...fromSpecies, ...fromAuthored];
 }
 
 function shuffle<T>(items: T[]): T[] {
@@ -56,8 +61,7 @@ function shuffle<T>(items: T[]): T[] {
   return copy;
 }
 
-/** card reward options after a fight: random class-pool cards, excluding the boring shared basics */
+/** card reward options after a fight: random class-pool cards */
 export function generateCardRewardOptions(classId: PlayerClassId, count = 3): Card[] {
-  const candidates = classCardPool(classId).filter((c) => !SHARED_CARD_IDS.has(c.id));
-  return shuffle(candidates).slice(0, count);
+  return shuffle(classCardPool(classId)).slice(0, count);
 }

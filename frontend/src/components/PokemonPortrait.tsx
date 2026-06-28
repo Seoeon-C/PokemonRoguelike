@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getTypeColor } from "../game/pokedex/typeColors";
-import { getPokemonSprite } from "../game/pokedex/pokemonImages";
+import { getPokemonArtwork } from "../game/pokedex/pokemonImages";
 
 export function PokemonPortrait({
   speciesId,
@@ -40,10 +40,10 @@ export function PokemonPortrait({
         name.charAt(0).toUpperCase()
       ) : (
         <img
-          src={getPokemonSprite(speciesId)}
+          src={getPokemonArtwork(speciesId)}
           alt={name}
           onError={() => setBroken(true)}
-          style={{ width: "85%", height: "85%", objectFit: "contain", imageRendering: "pixelated" }}
+          style={{ width: "85%", height: "85%", objectFit: "contain", imageRendering: "auto" }}
         />
       )}
     </div>
