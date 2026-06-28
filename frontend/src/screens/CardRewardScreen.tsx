@@ -2,6 +2,7 @@ import type { Card } from "../types/card";
 import { TypeBadge } from "../components/TypeBadge";
 import { STATUS_LABELS } from "../game/pokedex/statusLabels";
 import { STAT_STAGE_LABELS, baselineCardDamage } from "../game/combat";
+import { getPokemonSprite } from "../game/pokedex/pokemonImages";
 
 function describeEffect(effect: Card["effects"][number]): string {
   if (effect.kind === "damage") {
@@ -38,6 +39,13 @@ export function CardRewardScreen({
               {card.moveType && <TypeBadge type={card.moveType} size={16} />}{" "}
               <strong>{card.koreanName ?? card.name}</strong>
             </div>
+            {card.sourceSpeciesId && (
+              <img
+                src={getPokemonSprite(card.sourceSpeciesId)}
+                alt={card.koreanName ?? card.name}
+                style={{ width: 48, height: 48, imageRendering: "pixelated", display: "block", margin: "6px auto" }}
+              />
+            )}
             <div style={{ fontSize: 12, marginTop: 4 }}>코스트 {card.cost}</div>
             <div style={{ fontSize: 11, marginTop: 4 }}>
               {card.effects.map((e, ei) => (

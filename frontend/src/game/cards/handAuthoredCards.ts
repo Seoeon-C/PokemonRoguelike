@@ -1,60 +1,14 @@
 import type { Card } from "../../types/card";
 
-/** cards that aren't derived from a Pokemon move: basic strikes/defends, draw, energy, orb utility */
+/** cards that aren't derived from a Pokemon species: mage orb utility only — generic
+ * basic-strike/basic-guard/quick-scout/deep-breath fillers were removed so every card
+ * in the game (besides orb utility) is a Pokemon */
 export const HAND_AUTHORED_CARDS: Card[] = [
-  // shared basics (every class starts with a few of these)
-  {
-    id: "basic-strike",
-    sourceMoveId: null,
-    name: "basic-strike",
-    koreanName: "기본 타격",
-    cost: 1,
-    category: "attack",
-    classId: "warrior",
-    exhaust: false,
-    moveType: "normal",
-    effects: [{ kind: "damage", power: 40, moveType: "normal", critRate: 0, minHits: null, maxHits: null }],
-  },
-  {
-    id: "basic-guard",
-    sourceMoveId: null,
-    name: "basic-guard",
-    koreanName: "기본 방어",
-    cost: 1,
-    category: "skill",
-    classId: "warrior",
-    exhaust: false,
-    moveType: null,
-    effects: [{ kind: "block", amount: 5 }],
-  },
-  {
-    id: "quick-scout",
-    sourceMoveId: null,
-    name: "quick-scout",
-    koreanName: "정찰",
-    cost: 1,
-    category: "skill",
-    classId: "warrior",
-    exhaust: false,
-    moveType: null,
-    effects: [{ kind: "draw", count: 2 }],
-  },
-  {
-    id: "deep-breath",
-    sourceMoveId: null,
-    name: "deep-breath",
-    koreanName: "심호흡",
-    cost: 0,
-    category: "skill",
-    classId: "warrior",
-    exhaust: true,
-    moveType: null,
-    effects: [{ kind: "energyGain", amount: 2 }],
-  },
   // mage orb utility
   {
     id: "channel-fire",
     sourceMoveId: null,
+    sourceSpeciesId: null,
     name: "channel-fire",
     koreanName: "불꽃 오브 충전",
     cost: 1,
@@ -67,6 +21,7 @@ export const HAND_AUTHORED_CARDS: Card[] = [
   {
     id: "channel-water",
     sourceMoveId: null,
+    sourceSpeciesId: null,
     name: "channel-water",
     koreanName: "물 오브 충전",
     cost: 1,
@@ -79,6 +34,7 @@ export const HAND_AUTHORED_CARDS: Card[] = [
   {
     id: "channel-electric",
     sourceMoveId: null,
+    sourceSpeciesId: null,
     name: "channel-electric",
     koreanName: "전기 오브 충전",
     cost: 1,
@@ -91,6 +47,7 @@ export const HAND_AUTHORED_CARDS: Card[] = [
   {
     id: "channel-psychic",
     sourceMoveId: null,
+    sourceSpeciesId: null,
     name: "channel-psychic",
     koreanName: "에스퍼 오브 충전",
     cost: 1,
@@ -103,6 +60,7 @@ export const HAND_AUTHORED_CARDS: Card[] = [
   {
     id: "evoke-front",
     sourceMoveId: null,
+    sourceSpeciesId: null,
     name: "evoke-front",
     koreanName: "오브 발동",
     cost: 0,

@@ -146,6 +146,7 @@ async function fetchSpecies(speciesName) {
     },
     movepool,
     evolvesTo,
+    abilities: pokemon.abilities.sort((a, b) => a.slot - b.slot).map((a) => a.ability.name),
     spriteUrl: pokemon.sprites.front_default,
   };
 }

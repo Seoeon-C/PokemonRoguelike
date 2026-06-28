@@ -19,6 +19,7 @@ export type CardEffect =
 export interface Card {
   id: string;
   sourceMoveId: string | null;
+  sourceSpeciesId: string | null;
   name: string;
   koreanName: string | null;
   cost: number;
