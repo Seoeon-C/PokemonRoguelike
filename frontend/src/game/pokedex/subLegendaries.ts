@@ -2,8 +2,9 @@
 // (legendary trios/beasts/Ultra Beasts etc. that aren't the single box-art legendary
 // of their generation). Curated by hand since there's no API field for this.
 export const SUB_LEGENDARY_IDS = new Set([
-  // gen 1-2 trios
+  // gen 1-2 trios (+ Galar regional forms, same tier as their base form)
   "articuno", "zapdos", "moltres",
+  "articuno-galar", "zapdos-galar", "moltres-galar",
   "raikou", "entei", "suicune",
   // gen 3
   "regirock", "regice", "registeel", "latias", "latios",

@@ -2,8 +2,17 @@ import type { Card, PlayerClassId, StatStageKey } from "../types/card";
 import type { CombatState, EnemyCombatant, PlayerCombatant, ClassResourceState } from "../types/combat";
 import type { StatusCondition } from "../types/pokemon";
 import { getSpecies, getMove } from "./pokedex/data";
+import { dominantStat } from "./cards/cardFromSpecies";
 import { getTypeEffectiveness } from "./pokedex/typeChart";
 import { STATUS_LABELS } from "./pokedex/statusLabels";
+
+type EnemyEncounterType = "battle" | "elite" | "boss";
+
+const ENEMY_BLOCK_CONFIG: Record<EnemyEncounterType, { blockAmount: number; interval: number }> = {
+  battle: { blockAmount: 30,  interval: 4 },
+  elite:  { blockAmount: 60,  interval: 4 },
+  boss:   { blockAmount: 100, interval: 4 },
+};
 
 const DAMAGE_SCALE = 0.13;
 const BASE_PLAYER_POWER = 70; // flat stand-in for an "attack stat", since the player isn't a Pokemon
@@ -73,16 +82,24 @@ function rollConfusionSelfHit(status: StatusCondition | null): boolean {
   return status === "confusion" && Math.random() < CONFUSION_SKIP_CHANCE;
 }
 
-export function createEnemyCombatant(speciesId: string, instanceId: string, statMultiplier: number): EnemyCombatant {
+export function createEnemyCombatant(speciesId: string, instanceId: string, statMultiplier: number, encounterType: EnemyEncounterType = "battle"): EnemyCombatant {
   const species = getSpecies(speciesId);
   const scale = (n: number) => Math.round(n * statMultiplier);
   const maxHp = scale(species.baseStats.hp);
   const moves = species.movepool.slice(0, 4);
+  const dom = dominantStat(species.baseStats);
+  const defensiveType = (dom === "attack" || dom === "defense") ? "physical" : "special";
+  const blockCfg = ENEMY_BLOCK_CONFIG[encounterType];
   return {
     instanceId,
     speciesId,
     name: species.koreanName ?? species.name,
     types: species.types,
+    defensiveType,
+    block: blockCfg.blockAmount,
+    blockRefreshIn: blockCfg.interval,
+    bigBlockAmount: blockCfg.blockAmount,
+    blockInterval: blockCfg.interval,
     stats: {
       hp: maxHp,
       attack: scale(species.baseStats.attack),
@@ -159,8 +176,17 @@ function aliveEnemies(state: CombatState): EnemyCombatant[] {
 }
 
 function applyDamageToEnemy(enemy: EnemyCombatant, amount: number, log: string[]): void {
-  enemy.currentHp = Math.max(0, enemy.currentHp - amount);
-  log.push(`${enemy.name}에게 ${amount}의 데미지!`);
+  const absorbed = Math.min(enemy.block, amount);
+  enemy.block -= absorbed;
+  const remaining = amount - absorbed;
+  enemy.currentHp = Math.max(0, enemy.currentHp - remaining);
+  if (absorbed > 0 && remaining > 0) {
+    log.push(`${enemy.name}의 방어도 ${absorbed} 흡수, ${remaining} 데미지!`);
+  } else if (absorbed > 0) {
+    log.push(`${enemy.name}의 방어도를 ${absorbed} 깎았다!`);
+  } else {
+    log.push(`${enemy.name}에게 ${amount}의 데미지!`);
+  }
   if (enemy.currentHp === 0) {
     enemy.fainted = true;
     log.push(`${enemy.name}은 쓰러졌다!`);
@@ -181,12 +207,15 @@ function classDamageBonus(resource: ClassResourceState): number {
 }
 
 /** damage a player card would deal to `enemy` right now — also used to show a live preview on the card */
-export function cardDamageToEnemy(power: number, moveType: string, enemy: EnemyCombatant, resource: ClassResourceState): number {
-  const effectiveness = getTypeEffectiveness(moveType, enemy.types);
-  if (effectiveness === 0) return 0;
+export function cardDamageToEnemy(power: number, sourceTypes: string[], attackCategory: "physical" | "special", enemy: EnemyCombatant, resource: ClassResourceState): number {
+  // pick the attacker type that gives the best (highest) effectiveness against this enemy
+  const effectiveness = sourceTypes.length > 0
+    ? Math.max(...sourceTypes.map((t) => getTypeEffectiveness(t, enemy.types)))
+    : 1;
   const defStat = (effectiveStat(enemy, "defense") + effectiveStat(enemy, "specialDefense")) / 2;
   const base = power * (BASE_PLAYER_POWER / defStat) * DAMAGE_SCALE + 2;
-  return Math.max(1, Math.round(base * effectiveness) + classDamageBonus(resource));
+  const typeMismatch = attackCategory !== enemy.defensiveType ? 0.5 : 1;
+  return Math.max(1, Math.round(base * effectiveness * typeMismatch) + classDamageBonus(resource));
 }
 
 /** damage at a neutral (1.0x) matchup with no class bonus — used outside combat (card reward/shop screens)
@@ -305,7 +334,7 @@ export function playCard(
         const hits = rollHitCount(effect.minHits, effect.maxHits);
         if (hits > 1) next.log.push(`${hits}번 연속 공격!`);
         for (let h = 0; h < hits && !target.fainted; h++) {
-          let dmg = cardDamageToEnemy(effect.power, effect.moveType, target, next.player.resource);
+          let dmg = cardDamageToEnemy(effect.power, card.sourceTypes, effect.attackCategory, target, next.player.resource);
           if (rollCrit(effect.critRate)) {
             dmg = Math.round(dmg * CRIT_DAMAGE_MULTIPLIER);
             next.log.push("치명타!");
@@ -379,6 +408,15 @@ function runEnemyTurn(state: CombatState): void {
     const gate = resolveStatusGate(enemy.status, enemy.name, state.log);
     enemy.status = gate.status;
     if (!gate.canAct) continue;
+
+    // 블록 리필 턴: 공격 없이 방어도만 추가
+    if (enemy.blockRefreshIn <= 0) {
+      enemy.block += enemy.bigBlockAmount;
+      enemy.blockRefreshIn = enemy.blockInterval;
+      state.log.push(`${enemy.name}은 방어 태세를 취했다! (방어도 +${enemy.bigBlockAmount})`);
+      continue;
+    }
+    enemy.blockRefreshIn -= 1;
 
     if (rollConfusionSelfHit(enemy.status)) {
       const selfDmg = confusionSelfDamageToEnemy(enemy);
