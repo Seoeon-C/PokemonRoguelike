@@ -13,7 +13,6 @@ const API = "https://pokeapi.co/api/v2";
 // tried in order; falls through to an earlier game if a species has no
 // learnset data for newer games (e.g. not in the base dex without DLC/transfer)
 const VERSION_GROUP_FALLBACKS = ["scarlet-violet", "sword-shield", "sun-moon", "x-y", "black-white"];
-const MOVEPOOL_CAP = 8;
 const CONCURRENCY = 10;
 const MAX_RETRIES = 4;
 
@@ -125,7 +124,7 @@ async function fetchSpecies(speciesName) {
     if (levelUpMoves.length > 0) break;
   }
 
-  const movepool = [...new Set(levelUpMoves.map((m) => m.name))].slice(0, MOVEPOOL_CAP);
+  const movepool = [...new Set(levelUpMoves.map((m) => m.name))];
   const evolvesTo = await getNextEvolution(speciesData);
 
   return {
@@ -172,6 +171,7 @@ async function fetchMove(name) {
     accuracy: move.accuracy,
     energyCost: energyCostFor(move.damage_class?.name, move.power),
     target: move.target.name,
+    learnedByCount: move.learned_by_pokemon.length,
     meta: move.meta
       ? {
           ailment: move.meta.ailment.name !== "none" ? move.meta.ailment.name : null,

@@ -38,7 +38,7 @@ export function createEnemyEncounter(seed: string, nodeType: NodeType, floor: nu
 
   return Array.from({ length: count }, (_, i) => {
     const species = pool[Math.floor(Math.random() * pool.length)];
-    return createEnemyCombatant(species.id, `enemy-${seed}-${i}`, statMultiplier);
+    return createEnemyCombatant(species.id, `enemy-${seed}-${i}`, statMultiplier, nodeType as "battle" | "elite" | "boss");
   });
 }
 

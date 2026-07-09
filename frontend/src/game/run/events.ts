@@ -35,7 +35,7 @@ function damage(run: RunState, amount: number): RunState {
 }
 
 function addRandomCard(run: RunState): RunState {
-  const [card] = generateCardRewardOptions(run.classId, 1);
+  const [card] = generateCardRewardOptions(run.classId, "battle", 1);
   return card ? { ...run, deck: [...run.deck, card] } : run;
 }
 

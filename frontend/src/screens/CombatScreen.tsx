@@ -32,6 +32,7 @@ const CARD_BG: Record<PlayerClassId, string> = {
 
 function describeEffect(
   effect: Card['effects'][number],
+  sourceTypes: string[],
   previewTarget: EnemyCombatant | null,
   resource: CombatState['player']['resource'],
   showTargetName: boolean,
@@ -54,7 +55,8 @@ function describeEffect(
     if (!previewTarget) return `${effect.power} 위력 공격${hitNote}${critNote}`;
     const dmg = cardDamageToEnemy(
       effect.power,
-      effect.moveType,
+      sourceTypes,
+      effect.attackCategory,
       previewTarget,
       resource,
     );
@@ -310,6 +312,21 @@ export function CombatScreen({
               )}
               <HpBar current={enemy.currentHp} max={enemy.maxHp} />
 
+              {!enemy.fainted && (
+                <>
+                  {enemy.block > 0 && (
+                    <div style={{ fontSize: 11, color: '#7dd3fc', marginTop: 2 }}>
+                      🛡 방어도 {enemy.block}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 10, color: '#fbbf24', marginTop: 2 }}>
+                    {enemy.blockRefreshIn === 0
+                      ? `🛡 방어도 +${enemy.bigBlockAmount} (이번 턴!)`
+                      : `🛡 방어도 +${enemy.bigBlockAmount} (${enemy.blockRefreshIn}턴 후)`}
+                  </div>
+                </>
+              )}
+
               {i === firstAliveEnemyIndex &&
                 !enemy.fainted &&
                 pendingCardIndex == null && (
@@ -477,11 +494,12 @@ export function CombatScreen({
                     </div>
                   </div>
 
-                  {/* 중간 그래픽: 포켓몬 카드면 픽셀 스프라이트, 아니면 카드 이모지 */}
+                  {/* 중간 그래픽: 포켓몬 카드면 픽셀 스프라이트 + 대표 기술명, 아니면 카드 이모지 */}
                   <div
                     style={{
                       flex: 1,
                       display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
                       pointerEvents: 'none',
@@ -495,6 +513,11 @@ export function CombatScreen({
                       />
                     ) : (
                       <span style={{ opacity: 0.15, fontSize: 28 }}>🃏</span>
+                    )}
+                    {card.sourceMoveId && (
+                      <span style={{ fontSize: 9, opacity: 0.7, marginTop: 2 }}>
+                        {displayMoveName(getMove(card.sourceMoveId))}
+                      </span>
                     )}
                   </div>
 
@@ -524,6 +547,7 @@ export function CombatScreen({
                       >
                         {describeEffect(
                           e,
+                          card.sourceTypes,
                           previewTarget,
                           state.player.resource,
                           aliveIndices.length > 1,

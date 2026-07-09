@@ -22,8 +22,10 @@ const TYPE_CHART: Record<string, Record<string, number>> = {
 };
 
 export function getTypeEffectiveness(moveType: string, defenderTypes: string[]): number {
-  return defenderTypes.reduce((multiplier, defType) => {
+  const raw = defenderTypes.reduce((multiplier, defType) => {
     const value = TYPE_CHART[moveType]?.[defType];
     return multiplier * (value ?? 1);
   }, 1);
+  // 무효(0x) → 이중반감(0.25x): 게임상 항상 최소 데미지 보장
+  return raw === 0 ? 0.25 : raw;
 }

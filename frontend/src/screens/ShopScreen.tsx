@@ -15,6 +15,7 @@ import { STAT_STAGE_LABELS, baselineCardDamage } from "../game/combat";
 import { TypeBadge } from "../components/TypeBadge";
 import { STATUS_LABELS } from "../game/pokedex/statusLabels";
 import { getPokemonSprite } from "../game/pokedex/pokemonImages";
+import { getMove, displayMoveName } from "../game/pokedex/data";
 
 function describeEffect(effect: Card["effects"][number]): string {
   if (effect.kind === "damage") {
@@ -108,6 +109,9 @@ export function ShopScreen({ run, onDone }: { run: RunState; onDone: (run: RunSt
                 alt={offer.card.koreanName ?? offer.card.name}
                 style={{ width: 48, height: 48, imageRendering: "pixelated", display: "block", margin: "6px auto" }}
               />
+            )}
+            {offer.card.sourceMoveId && (
+              <div style={{ fontSize: 10, opacity: 0.7 }}>{displayMoveName(getMove(offer.card.sourceMoveId))}</div>
             )}
             <div style={{ fontSize: 11, marginTop: 4 }}>
               {offer.card.effects.map((e, ei) => (

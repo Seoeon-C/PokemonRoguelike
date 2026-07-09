@@ -4,7 +4,7 @@ import type { CombatState } from "./types/combat";
 import type { RunState } from "./types/run";
 import { createCombatState, endTurn, playCard } from "./game/combat";
 import { createEnemyEncounter, createInitialRun } from "./game/run/createRun";
-import { generateCardRewardOptions } from "./game/cards/classCardPools";
+import { generateCardRewardOptions, type EncounterType } from "./game/cards/classCardPools";
 import { getNode } from "./game/map/mapHelpers";
 import { ClassSelectScreen } from "./screens/ClassSelectScreen";
 import { CombatScreen } from "./screens/CombatScreen";
@@ -86,7 +86,9 @@ function App() {
             visitedNodeIds: [...run.visitedNodeIds, nodeId],
           };
           setRun(updatedRun);
-          setCardReward({ nodeId, options: generateCardRewardOptions(updatedRun.classId) });
+          const node = getNode(updatedRun.map, nodeId);
+          const encounterType = node.type as EncounterType;
+          setCardReward({ nodeId, options: generateCardRewardOptions(updatedRun.classId, encounterType) });
         }}
       />
     );

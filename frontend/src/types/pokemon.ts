@@ -26,6 +26,7 @@ export interface Move {
   accuracy: number | null;
   energyCost: number;
   target: string;
+  learnedByCount: number;
   meta: MoveMeta | null;
   statChanges: StatChange[];
 }

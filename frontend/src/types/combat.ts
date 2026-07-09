@@ -27,10 +27,15 @@ export interface EnemyCombatant {
   speciesId: string;
   name: string;
   types: string[];
+  defensiveType: "physical" | "special";
   stats: BaseStats;
   statStages: Record<StatStageKey, number>;
   currentHp: number;
   maxHp: number;
+  block: number;
+  blockRefreshIn: number;
+  bigBlockAmount: number;
+  blockInterval: number;
   moves: string[];
   status: StatusCondition | null;
   fainted: boolean;

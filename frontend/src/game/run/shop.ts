@@ -23,5 +23,5 @@ function priceForCard(card: Card): number {
 }
 
 export function generateShopOffers(run: RunState, count = 3): ShopOffer[] {
-  return generateCardRewardOptions(run.classId, count).map((card) => ({ card, cost: priceForCard(card) }));
+  return generateCardRewardOptions(run.classId, "battle", count).map((card) => ({ card, cost: priceForCard(card) }));
 }
